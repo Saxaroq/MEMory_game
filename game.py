@@ -73,6 +73,8 @@ def start_screen():
 
 start_screen()
 
+ACTUALL_DIFF = None
+
 
 def main():
     mousex = 0
@@ -81,28 +83,35 @@ def main():
     first_box = None  # ЕГОР, СЮДА ТЫ ПИХАЕШЬ КОРБКУ, НА КОТОРУЮ НАЖАЛИ В ПЕРВЫЙ РАЗ
     Screen.fill(BGCOLOR)
     running = True
+    menu_run = True
 
     while running:
 
         def set_difficulty(value, difficulty):
-            pass
+            global ACTUALL_DIFF
+            ACTUALL_DIFF = value[1]
+            return ACTUALL_DIFF
 
         def start_the_game():
-            pass
+            Screen.fill(BGCOLOR)
+            diff = ACTUALL_DIFF
+            if diff == 0:
+                pass
 
-        menu = pygame_menu.Menu('Добро пожаловать', 800, 600,
-                                theme=pygame_menu.themes.THEME_BLUE)
+        while menu_run:
+            menu = pygame_menu.Menu('Добро пожаловать', 800, 600,
+                                    theme=pygame_menu.themes.THEME_BLUE)
 
-        menu.add.text_input('Ваше имя :', default='Jo Mama')
-        menu.add.selector('Сложность :', [('Легкая', 1), ('Сложная', 2)], onchange=set_difficulty)
-        menu.add.button('Играть', start_the_game)
-        menu.add.button('Выйти', pygame_menu.events.EXIT)
+            menu.add.text_input('Ваше имя :', default='Jo Mama')
+            menu.add.selector('Сложность :', [('Легкая', 1), ('Сложная', 2)], onchange=set_difficulty)
+            menu.add.button('Играть', start_the_game)
+            menu.add.button('Выйти', pygame_menu.events.EXIT)
 
-        menu.mainloop(Screen)
+            menu.mainloop(Screen)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
 
 if __name__ == '__main__':
