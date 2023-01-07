@@ -18,6 +18,44 @@ clock = pygame.time.Clock()
 pygame.init()
 
 
+class Board:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.board = [[1] * width for _ in range(height)]
+        self.left = 100
+        self.top = 10
+        self.cell_size = 30
+
+    def render(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                pygame.draw.rect(Screen, pygame.Color(255, 100, 100), (
+                    x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size),
+                                 self.board[y][x])
+
+    def set_view(self, left, top, cell_size):
+        self.left = left
+        self.top = top
+        self.cell_size = cell_size
+
+    def on_click(self, cell_coords):
+        self.board[cell_coords[0]][cell_coords[1]] = (self.board[cell_coords[0]][cell_coords[1]] + 1) % 2
+
+    def get_cell(self, mouse_pos):
+        if self.left <= mouse_pos[1] < self.left + self.height * self.cell_size\
+                and self.top <= mouse_pos[0] < self.top + self.width * self.cell_size:
+            return int((mouse_pos[1] - self.left) / self.cell_size), int((mouse_pos[0] - self.top) / self.cell_size)
+        else:
+            return None
+
+    def get_click(self, mouse_pos):
+        cell = self.get_cell(mouse_pos)
+        if cell is not None:
+            self.on_click(cell)
+
+
+
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     try:
@@ -71,6 +109,37 @@ def start_screen():
         clock.tick(FPS)
 
 
+def game(diff):
+    if diff == 0:
+        board = Board(4, 4)
+        board.set_view(100, 100, 50)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    board.get_click(event.pos)
+            Screen.fill((100, 100, 100))
+            board.render()
+            pygame.display.flip()
+        pygame.quit()
+    if diff == 1:
+        board = Board(6, 6)
+        board.set_view(100, 100, 50)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    board.get_click(event.pos)
+            Screen.fill((100, 100, 100))
+            board.render()
+            pygame.display.flip()
+        pygame.quit()
+
+
 start_screen()
 
 ACTUALL_DIFF = None
@@ -83,8 +152,6 @@ def main():
     first_box = None  # ЕГОР, СЮДА ТЫ ПИХАЕШЬ КОРБКУ, НА КОТОРУЮ НАЖАЛИ В ПЕРВЫЙ РАЗ
     Screen.fill(BGCOLOR)
     running = True
-    menu_run = True
-
     while running:
 
         def set_difficulty(value, difficulty):
@@ -93,25 +160,22 @@ def main():
             return ACTUALL_DIFF
 
         def start_the_game():
-            Screen.fill(BGCOLOR)
             diff = ACTUALL_DIFF
-            if diff == 0:
-                pass
+            game(diff)
 
-        while menu_run:
-            menu = pygame_menu.Menu('Добро пожаловать', 800, 600,
-                                    theme=pygame_menu.themes.THEME_BLUE)
+        menu = pygame_menu.Menu('Добро пожаловать', 800, 600,
+                                theme=pygame_menu.themes.THEME_DEFAULT)
 
-            menu.add.text_input('Ваше имя :', default='Jo Mama')
-            menu.add.selector('Сложность :', [('Легкая', 1), ('Сложная', 2)], onchange=set_difficulty)
-            menu.add.button('Играть', start_the_game)
-            menu.add.button('Выйти', pygame_menu.events.EXIT)
+        menu.add.text_input('Ваше имя :', default='Jo Mama')
+        menu.add.selector('Сложность :', [('Легкая', 1), ('Сложная', 2)], onchange=set_difficulty)
+        menu.add.button('Играть', start_the_game)
+        menu.add.button('Выйти', pygame_menu.events.EXIT)
 
-            menu.mainloop(Screen)
+        menu.mainloop(Screen)
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
 
 if __name__ == '__main__':
