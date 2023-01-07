@@ -1,20 +1,55 @@
 import os
 import pygame
 import sys
+import pygame_menu
 
 FPS = 60
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
-BOX_SIZE = 30
-BETWEEN_BOX = 15
 
-BGCOLOR = pygame.Color("BLUE")
-BOXCOLOT = pygame.Color("WHITE")
 
 Screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 clock = pygame.time.Clock()
 
 pygame.init()
+
+
+class Board:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.board = [[1] * width for _ in range(height)]
+        self.left = 10
+        self.top = 10
+        self.cell_size = 64
+
+    def render(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                pygame.draw.rect(Screen, pygame.Color(255, 100, 100), (
+                    x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size),
+                                 self.board[y][x])
+
+    def set_view(self, left, top, cell_size):
+        self.left = left
+        self.top = top
+        self.cell_size = cell_size
+
+    def on_click(self, cell_coords):
+        self.board[cell_coords[0]][cell_coords[1]] = (self.board[cell_coords[0]][cell_coords[1]] + 1) % 2
+
+    def get_cell(self, mouse_pos):
+        if self.left <= mouse_pos[1] < self.left + self.height * self.cell_size\
+                and self.top <= mouse_pos[0] < self.top + self.width * self.cell_size:
+            return int((mouse_pos[1] - self.left) / self.cell_size), int((mouse_pos[0] - self.top) / self.cell_size)
+        else:
+            return None
+
+    def get_click(self, mouse_pos):
+        cell = self.get_cell(mouse_pos)
+        if cell is not None:
+            self.on_click(cell)
+
 
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
@@ -43,7 +78,8 @@ def start_screen():
                   "Правила игры:",
                   "После нажатия на любую клавишу вы увидите поле из кратинок",
                   "У вас есть три секунды, чтобы запомнить их положние",
-                  "После чего они закроются и вам нужно будет их открыть по памяти",
+                  "После чего они закроются и вам нужно будет их открыть по памяти", "",
+                  "Сейчас вы увидете меню, в котором сможете выбрать сложность игры и ввести свое имя", "",
                   "Удачи!"]
     back_screen = pygame.transform.scale(load_image('background_image.jpg'), (WINDOWWIDTH, WINDOWHEIGHT))
     Screen.blit(back_screen, (0, 0))
@@ -68,10 +104,77 @@ def start_screen():
         clock.tick(FPS)
 
 
+def game(diff):
+    if diff == 0:
+        board = Board(4, 4)
+        board.set_view(100, 100, 80)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    board.get_click(event.pos)
+            Screen.fill((100, 100, 100))
+            board.render()
+            meme_test = load_image('meme1.jpg')
+            meme_rect = meme_test.get_rect()
+            Screen.blit(meme_test, meme_rect)
+            pygame.display.flip()
+        pygame.quit()
+    if diff == 1:
+        board = Board(6, 6)
+        board.set_view(100, 100, 80)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    board.get_click(event.pos)
+            Screen.fill((100, 100, 100))
+            board.render()
+            pygame.display.flip()
+        pygame.quit()
+
+
 start_screen()
 
-while True:
+ACTUALL_DIFF = None
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+meme_test = load_image('meme1.jpg')
+meme_rect = meme_test.get_rect(
+    bottomright=(WINDOWWIDTH, WINDOWHEIGHT))
+Screen.blit(meme_test, meme_rect)
+
+def main():
+    pygame.display.set_caption('MEMory Game')
+    running = True
+    while running:
+
+        def set_difficulty(value, difficulty):
+            global ACTUALL_DIFF
+            ACTUALL_DIFF = value[1]
+            return ACTUALL_DIFF
+
+        def start_the_game():
+            diff = ACTUALL_DIFF
+            game(diff)
+
+        menu = pygame_menu.Menu('Добро пожаловать', 800, 600,
+                                theme=pygame_menu.themes.THEME_DEFAULT)
+
+        menu.add.text_input('Ваше имя :', default='Jo Mama')
+        menu.add.selector('Сложность :', [('Легкая', 1), ('Сложная', 2)], onchange=set_difficulty)
+        menu.add.button('Играть', start_the_game)
+        menu.add.button('Выйти', pygame_menu.events.EXIT)
+
+        menu.mainloop(Screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+
+if __name__ == '__main__':
+    main()
