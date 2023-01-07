@@ -6,11 +6,7 @@ import pygame_menu
 FPS = 60
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 600
-BOX_SIZE = 30
-BETWEEN_BOX = 15
 
-BGCOLOR = pygame.Color("BLUE")
-BOXCOLOT = pygame.Color("WHITE")
 
 Screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 clock = pygame.time.Clock()
@@ -23,9 +19,9 @@ class Board:
         self.width = width
         self.height = height
         self.board = [[1] * width for _ in range(height)]
-        self.left = 100
+        self.left = 10
         self.top = 10
-        self.cell_size = 30
+        self.cell_size = 64
 
     def render(self):
         for y in range(self.height):
@@ -53,7 +49,6 @@ class Board:
         cell = self.get_cell(mouse_pos)
         if cell is not None:
             self.on_click(cell)
-
 
 
 def load_image(name, color_key=None):
@@ -112,7 +107,7 @@ def start_screen():
 def game(diff):
     if diff == 0:
         board = Board(4, 4)
-        board.set_view(100, 100, 50)
+        board.set_view(100, 100, 80)
         running = True
         while running:
             for event in pygame.event.get():
@@ -122,11 +117,14 @@ def game(diff):
                     board.get_click(event.pos)
             Screen.fill((100, 100, 100))
             board.render()
+            meme_test = load_image('meme1.jpg')
+            meme_rect = meme_test.get_rect()
+            Screen.blit(meme_test, meme_rect)
             pygame.display.flip()
         pygame.quit()
     if diff == 1:
         board = Board(6, 6)
-        board.set_view(100, 100, 50)
+        board.set_view(100, 100, 80)
         running = True
         while running:
             for event in pygame.event.get():
@@ -144,13 +142,13 @@ start_screen()
 
 ACTUALL_DIFF = None
 
+meme_test = load_image('meme1.jpg')
+meme_rect = meme_test.get_rect(
+    bottomright=(WINDOWWIDTH, WINDOWHEIGHT))
+Screen.blit(meme_test, meme_rect)
 
 def main():
-    mousex = 0
-    mousey = 0
     pygame.display.set_caption('MEMory Game')
-    first_box = None  # ЕГОР, СЮДА ТЫ ПИХАЕШЬ КОРБКУ, НА КОТОРУЮ НАЖАЛИ В ПЕРВЫЙ РАЗ
-    Screen.fill(BGCOLOR)
     running = True
     while running:
 
