@@ -1007,7 +1007,7 @@ def game(diff):
 
         pygame.display.flip()
         while running:
-            if HARD_COUNTER == 16:
+            if HARD_COUNTER == 18:
                 running = False
                 run_game()
             for event in pygame.event.get():
